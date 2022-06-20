@@ -246,41 +246,42 @@ class Table extends Widget with SpanningWidget {
     this.tableWidth = TableWidth.max,
   }) : super();
 
-  factory Table.fromTextArray({
-    Context? context,
-    required List<List<dynamic>> data,
-    EdgeInsets cellPadding = const EdgeInsets.all(5),
-    double cellHeight = 0,
-    Alignment cellAlignment = Alignment.topLeft,
-    Map<int, Alignment>? cellAlignments,
-    TextStyle? cellStyle,
-    TextStyle? oddCellStyle,
-    OnCellFormat? cellFormat,
-    OnCellDecoration? cellDecoration,
-    int headerCount = 1,
-    List<dynamic>? headers,
-    EdgeInsets? headerPadding,
-    double? headerHeight,
-    Alignment headerAlignment = Alignment.center,
-    Map<int, Alignment>? headerAlignments,
-    TextStyle? headerStyle,
-    OnCellFormat? headerFormat,
-    TableBorder? border = const TableBorder(
-      left: BorderSide(),
-      right: BorderSide(),
-      top: BorderSide(),
-      bottom: BorderSide(),
-      horizontalInside: BorderSide(),
-      verticalInside: BorderSide(),
-    ),
-    Map<int, TableColumnWidth>? columnWidths,
-    TableColumnWidth defaultColumnWidth = const IntrinsicColumnWidth(),
-    TableWidth tableWidth = TableWidth.max,
-    BoxDecoration? headerDecoration,
-    BoxDecoration? headerCellDecoration,
-    BoxDecoration? rowDecoration,
-    BoxDecoration? oddRowDecoration,
-  }) {
+  factory Table.fromTextArray(
+      {Context? context,
+      required List<List<dynamic>> data,
+      EdgeInsets cellPadding = const EdgeInsets.all(5),
+      double cellHeight = 0,
+      Alignment cellAlignment = Alignment.topLeft,
+      Map<int, Alignment>? cellAlignments,
+      TextStyle? cellStyle,
+      TextStyle? oddCellStyle,
+      OnCellFormat? cellFormat,
+      OnCellDecoration? cellDecoration,
+      int headerCount = 1,
+      List<dynamic>? headers,
+      EdgeInsets? headerPadding,
+      double? headerHeight,
+      Alignment headerAlignment = Alignment.center,
+      Map<int, Alignment>? headerAlignments,
+      TextStyle? headerStyle,
+      OnCellFormat? headerFormat,
+      TableBorder? border = const TableBorder(
+        left: BorderSide(),
+        right: BorderSide(),
+        top: BorderSide(),
+        bottom: BorderSide(),
+        horizontalInside: BorderSide(),
+        verticalInside: BorderSide(),
+      ),
+      Map<int, TableColumnWidth>? columnWidths,
+      TableColumnWidth defaultColumnWidth = const IntrinsicColumnWidth(),
+      TableWidth tableWidth = TableWidth.max,
+      BoxDecoration? headerDecoration,
+      BoxDecoration? headerCellDecoration,
+      BoxDecoration? rowDecoration,
+      BoxDecoration? oddRowDecoration,
+      TextStyle? Function(int row, int col, TextStyle? oddCellStyle)?
+          cellFormatDelegate}) {
     assert(headerCount >= 0);
 
     if (context != null) {
@@ -351,6 +352,9 @@ class Table extends Widget with SpanningWidget {
           );
         }
       } else {
+        var column = 0;
+        cellFormatDelegate ??=
+            (row, col, oddCellStyle) => isOdd ? oddCellStyle : cellStyle;
         for (final dynamic cell in row) {
           final align = cellAlignments[tableRow.length] ?? cellAlignment;
           final textAlign = _textAlign(align);
@@ -366,11 +370,13 @@ class Table extends Widget with SpanningWidget {
                 cellFormat == null
                     ? cell.toString()
                     : cellFormat(tableRow.length, cell),
-                style: isOdd ? oddCellStyle : cellStyle,
+                style: cellFormatDelegate(
+                    rowNum - headerCount, column, oddCellStyle),
                 textAlign: textAlign,
               ),
             ),
           );
+          column++;
         }
       }
 
